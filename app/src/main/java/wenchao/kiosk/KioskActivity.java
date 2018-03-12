@@ -12,7 +12,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 
 public class KioskActivity extends Activity {
     /*
@@ -50,13 +53,13 @@ public class KioskActivity extends Activity {
             //myDevicePolicyManager.setLockTaskPackages(mDPM, packages);
             startLockTask();
         } else {
-            Toast.makeText(getApplicationContext(),"Not owner", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Not owner", Toast.LENGTH_LONG).show();
         }
 
         setVolumMax();
 
-        Button lock_btn = (Button)findViewById(wenchao.kiosk.R.id.lock_button);
-        Button unlock_btn = (Button)findViewById(wenchao.kiosk.R.id.unlock_button);
+        Button lock_btn = (Button) findViewById(wenchao.kiosk.R.id.lock_button);
+        Button unlock_btn = (Button) findViewById(wenchao.kiosk.R.id.unlock_button);
 
         lock_btn.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -73,17 +76,38 @@ public class KioskActivity extends Activity {
                 return false;
             }
         });
+
+        Button b1 = (Button) findViewById(R.id.button);
+        final TextView t1 = findViewById(R.id.textView);
+        Button b2 = (Button) findViewById(R.id.button2);
+        Button b3 = (Button) findViewById(R.id.button3);
+
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new MaterialDialog.Builder(KioskActivity.this)
+                        .title("Compteur")
+                        //         .inputRangeRes(2, 20, R.color.material_red_500
+                        .input(null, null, new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(MaterialDialog dialog, CharSequence input) {
+                                t1.setText("Nombre de jours sans accident = " + input);
+                            }
+                        }).show();
+            }
+        });
+
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event){
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             Toast.makeText(this, "Volume button is disabled", Toast.LENGTH_SHORT).show();
             return true;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             Toast.makeText(this, "Volume button is disabled", Toast.LENGTH_SHORT).show();
             return true;
         }
@@ -91,13 +115,14 @@ public class KioskActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void setVolumMax(){
+    private void setVolumMax() {
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(
                 AudioManager.STREAM_SYSTEM,
                 am.getStreamMaxVolume(AudioManager.STREAM_SYSTEM),
                 0);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
