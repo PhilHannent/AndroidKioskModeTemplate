@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/back_left"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/back_right"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@color/colorPrimary" />
+
+    <ImageView
+        android:id="@+id/back_right"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/back_left"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/tv_record"
+        style="@style/Counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="24dp"
+        android:text="407"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/tv_current_unite"
+        app:layout_constraintStart_toStartOf="@+id/back_right"
+        tools:text="407" />
+
+    <TextView
+        android:id="@+id/tv_record_title"
+        style="@style/CounterTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:drawableRight="@android:drawable/ic_media_play"
+        android:text="Notre record"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_record"
+        app:layout_constraintEnd_toStartOf="@+id/back_right" />
+
+    <TextView
+        android:id="@+id/tv_current_title1"
+        style="@style/CounterTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="8dp"
+        android:text="Nombre de jours"
+        app:layout_constraintBottom_toTopOf="@+id/tv_current_title2"
+        app:layout_constraintEnd_toStartOf="@+id/back_right" />
+
+    <TextView
+        android:id="@+id/tv_current_title2"
+        style="@style/CounterTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:drawableRight="@android:drawable/ic_media_play"
+        android:text="sans accident de travail"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_current"
+        app:layout_constraintEnd_toStartOf="@+id/back_right" />
+
+    <TextView
+        android:id="@+id/tv_current_unite"
+        style="@style/CounterTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="jours"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_record"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_current"
+        style="@style/Counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="8dp"
+        android:text="100"
+        app:layout_constraintBottom_toTopOf="@+id/tv_record"
+        app:layout_constraintEnd_toStartOf="@+id/tv_record_unite"
+        app:layout_constraintStart_toStartOf="@+id/back_right"
+        app:layout_constraintTop_toTopOf="@+id/back_right"
+        app:layout_constraintVertical_bias="0.417" />
+
+    <TextView
+        android:id="@+id/tv_record_unite"
+        style="@style/CounterTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="jours"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_current"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_lockButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@mipmap/ic_unlock" />
+
+    <TextClock
+        android:id="@+id/tv_currentDate"
+        android:layout_width="wrap_content"
+        style="@style/CounterTitle"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:format24Hour="dd MMM yyyy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_latestAccident"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="depuis le 23 janvier 2017"
+        app:layout_constraintEnd_toEndOf="@+id/back_right"
+        app:layout_constraintTop_toBottomOf="@+id/tv_current" />
+</android.support.constraint.ConstraintLayout>

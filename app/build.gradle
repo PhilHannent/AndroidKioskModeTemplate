@@ -1,11 +1,13 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.0"
+    buildToolsVersion "27.0.3"
 
     defaultConfig {
-        applicationId "wenchao.kiosk"
+        applicationId "fr.afaucogney.mobile.android.kioskhse"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
@@ -20,8 +22,33 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     // ... other dependencies here
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+// Because RxAndroid releases are few and far between, it is recommended you also
+// explicitly depend on RxJava's latest version for bug fixes and new features.
+// (see https://github.com/ReactiveX/RxJava/releases for latest 2.x.x version)
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.9'
+
+    // SharedPrefs
+    implementation 'com.github.pwittchen:prefser-rx2:2.2.1'
+
+    implementation 'com.andrognito.patternlockview:patternlockview:1.0.0'
+    // Optional, for RxJava2 adapter
+    implementation 'com.andrognito.patternlockview:patternlockview-reactive:1.0.0'
+    implementation 'net.danlew:android.joda:2.9.9.4'
+
+    implementation 'com.andrognito.patternlockview:patternlockview:1.0.0'
+    // Optional, for RxJava2 adapter
+    implementation 'com.andrognito.patternlockview:patternlockview-reactive:1.0.0'
+
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
+}
+
+repositories {
+    mavenCentral()
 }
