@@ -1,4 +1,4 @@
-package wenchao.kiosk;
+package fr.afaucogney.mobile.android.accidentcounter;
 
 import android.app.admin.DeviceAdminReceiver;
 
