@@ -6,17 +6,23 @@ import android.util.Log
 import com.uber.autodispose.kotlin.autoDisposable
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.base.BaseViewModel
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.rx.RxLogSubscriber
-import fr.afaucogney.mobile.android.accidentcounter.domain.AddNewAccidentUseCase
-import fr.afaucogney.mobile.android.accidentcounter.domain.ObserveAccidentsUseCase
+import fr.afaucogney.mobile.android.accidentcounter.domain.*
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import org.joda.time.DateTime
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 class AccidentCounterViewModel @Inject constructor(app: Application) : BaseViewModel(app), AccidentCounterContract.ViewModel {
 
-//    @Inject
-//    lateinit var observeRecordDayUseCase: ObserveRecordDayUseCase
+    @Inject
+    lateinit var removeAccidentUseCase: RemoveAccidentUseCase
+
+    @Inject
+    lateinit var clearAllAccidentsUseCase: ClearAllAccidentsUseCase
+
+    @Inject
+    lateinit var observeRecordDayUseCase: ObserveRecordDayUseCase
 
     @Inject
     lateinit var observeAccidentsUseCase: ObserveAccidentsUseCase
@@ -24,22 +30,22 @@ class AccidentCounterViewModel @Inject constructor(app: Application) : BaseViewM
     @Inject
     lateinit var addNewAccidentUseCase: AddNewAccidentUseCase
 
-//    @Inject
-//    lateinit var observeLatestAccidentUseCase: ObserveLatestAccidentUseCase
+    @Inject
+    lateinit var observeLatestAccidentUseCase: ObserveLatestAccidentUseCase
 
 
-    var accidents: MutableLiveData<List<String>> = MutableLiveData()
-    var record: MutableLiveData<String> = MutableLiveData()
-    var latestAccident: MutableLiveData<String> = MutableLiveData()
-    var current: MutableLiveData<String> = MutableLiveData()
-
+    val accidents: MutableLiveData<List<Long>> = MutableLiveData()
+    val record: MutableLiveData<String> = MutableLiveData()
+    val latestAccident: MutableLiveData<String> = MutableLiveData()
+    val current: MutableLiveData<String> = MutableLiveData()
+    val kioskMode: MutableLiveData<Boolean> = MutableLiveData()
 
     init {
         observeAccidentsUseCase
                 .execute()
 //                .filter { it.isEmpty() }
 //                .doOnNextLog()
-                .map { it.map { SimpleDateFormat("dd MM yyyy").format(it) } }
+//                .map { it.map { SimpleDateFormat("dd MM yyyy").format(it) } }
 //                .flatMap { Observable.just(it.map { SimpleDateFormat("dd MM yyyy").format(it) }) }
 //                .flatMap { Observable.fromArray(it).map { SimpleDateFormat("dd MM yyyy").format(it) }.doOnNextLog().toList().toObservable() }
 //                .map { it.mapTo()forEach {  it = SimpleDateFormat("dd MM yyyy").format(it)} }
@@ -50,21 +56,31 @@ class AccidentCounterViewModel @Inject constructor(app: Application) : BaseViewM
                 .autoDisposable(this)
                 .subscribeWith(RxLogSubscriber("accidents"))
 //
-//        observeRecordDayUseCase
-//                .execute()
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .doOnNext { record.value = it.toString() }
-//                .logAllSubscriptionEvents("record")
-//                .autoDisposable(this)
-//                .subscribeWith(RxLogSubscriber("record"))
-//
-//        observeLatestAccidentUseCase
-//                .execute()
-//                .doOnNext { latestAccident.value = SimpleDateFormat("dd MM yyyy").format(it) }
-//                .doOnNext { current.value = DateTime.now().minus(it).dayOfYear.toString() }
-//                .logAllSubscriptionEvents("latest")
-//                .autoDisposable(this)
-//                .subscribeWith(RxLogSubscriber("latest"))
+        observeRecordDayUseCase
+                .execute()
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { record.value = it.toString() }
+                .logAllSubscriptionEvents("record")
+                .autoDisposable(this)
+                .subscribeWith(RxLogSubscriber("record"))
+
+        observeLatestAccidentUseCase
+                .execute()
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { latestAccident.value = SimpleDateFormat("dd MM yyyy").format(it) }
+                .doOnNext { current.value = DateTime.now().minus(it).dayOfYear.toString() }
+                .onErrorResumeNext { t: Throwable ->
+                    if (t is NoSuchElementException) {
+                        latestAccident.value = "NA"
+                        current.value = "NA"
+                        Observable.empty()
+                    } else {
+                        Observable.error(t)
+                    }
+                }
+                .logAllSubscriptionEvents("latest")
+                .autoDisposable(this)
+                .subscribe(RxLogSubscriber("latest"))
 
         record.value = "-4"
     }
@@ -79,8 +95,12 @@ class AccidentCounterViewModel @Inject constructor(app: Application) : BaseViewM
         addNewAccidentUseCase.execute(accident)
     }
 
-    override fun removeAccident(accident: DateTime) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun clearAccidents() {
+        clearAllAccidentsUseCase.execute()
+    }
+
+    override fun removeAccident(accident: Long) {
+        removeAccidentUseCase.execute(accident)
     }
 
     override fun updateLockPattern() {

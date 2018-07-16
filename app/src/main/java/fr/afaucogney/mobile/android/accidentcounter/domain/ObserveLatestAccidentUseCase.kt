@@ -1,21 +1,22 @@
 package fr.afaucogney.mobile.android.accidentcounter.domain
 
-import com.github.pwittchen.prefser.library.rx2.Prefser
+import com.vicpin.krealmextensions.queryAllAsFlowable
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.utils.LogUtil
-import fr.afaucogney.mobile.android.accidentcounter.data.AccidentsList
-import fr.afaucogney.mobile.android.accidentcounter.data.Constants
+import fr.afaucogney.mobile.android.accidentcounter.data.AccidentEntity
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class ObserveLatestAccidentUseCase @Inject constructor() {
 
-    @Inject
-    lateinit var prefser: Prefser
-
     fun execute(): Observable<Long> {
-        LogUtil.d("PrefSer", prefser.toString())
-        return prefser
-                .getAndObserve(Constants.ACCIDENTS_KEY, AccidentsList, listOf())
-                .flatMap { Observable.just(it.min()) }
+        return AccidentEntity()
+                .queryAllAsFlowable()
+                .map { it.sortedByDescending { it.date } }
+                .toObservable()
+                .map { it.first() }
+                .map { it.date }
+                .doOnNext { LogUtil.d(this, "onNext$it") }
+                .subscribeOn(Schedulers.io())
     }
 }

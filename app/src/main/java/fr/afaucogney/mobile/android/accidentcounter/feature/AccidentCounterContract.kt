@@ -12,7 +12,7 @@ class AccidentCounterContract {
         fun showDaysRecord(dayCount: String)
         fun showLatestAccidentDate(accident: String)
 
-        fun showAccidentListDialog(accidents: List<String>)
+        fun showAccidentListDialog(accidents: List<Long>)
         fun showNewAccidentDateDialog()
         fun switchToKioskMode()
         fun releaseKioskMode()
@@ -24,14 +24,15 @@ class AccidentCounterContract {
     interface ViewModel : BaseActivityContract.ViewModel {
 
         // OUTPUT
-        fun observeAccidents(): MutableLiveData<List<String>>
+        fun observeAccidents(): MutableLiveData<List<Long>>
 
         fun observeDaysRecord(): MutableLiveData<String>
         fun observeLatestAccident(): MutableLiveData<String>
         fun observeDaysSinceLatestAccident(): MutableLiveData<String>
 
         fun addNewAccident(accident: DateTime)
-        fun removeAccident(accident: DateTime)
+        fun removeAccident(accident: Long)
+        fun clearAccidents()
         fun updateLockPattern()
     }
 

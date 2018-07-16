@@ -44,6 +44,7 @@ class KioskApp : Application() {
         // Initialize Realm
         Realm.init(this)
         val realmConfBuilder = RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
                 .name("accidentCounter.realm")
                 .schemaVersion(1)
 

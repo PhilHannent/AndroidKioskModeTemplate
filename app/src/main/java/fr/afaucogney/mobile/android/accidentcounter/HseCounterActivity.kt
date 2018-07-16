@@ -23,7 +23,10 @@ import kotlinx.android.synthetic.main.activity_kiosk_hse.*
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import toothpick.config.Module
+import java.text.SimpleDateFormat
 import javax.inject.Inject
+
+
 
 
 //import java.sql.Date
@@ -132,7 +135,7 @@ class HseCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilit
     @OnClick(R.id.tv_record)
     fun onRecordListClick() {
         if (!isLocked) {
-            showAccidentListDialog(viewModel.observeAccidents().value ?: listOf("void"))
+            showAccidentListDialog(viewModel.observeAccidents().value ?: listOf(-1L))
         }
     }
 
@@ -194,41 +197,59 @@ class HseCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilit
     override fun showNewAccidentDateDialog() {
         DateTime.now().run {
             val t = DatePickerDialog(this@HseCounterActivity, newAccidentDatelistener, this.year, this.monthOfYear - 1, this.dayOfMonth)
-            t.datePicker.maxDate = this.plusDays(1).millis
+            t.datePicker.maxDate = this.millis
             t.show()
         }
     }
 
     override fun showCurrentDayCountWithoutAccident(dayCount: String) {
-        tv_current.text = dayCount
+        if (dayCount.equals("NA")) {
+            tv_current.text = "-"
+        } else {
+            tv_current.text = dayCount
+        }
+
     }
 
     override fun showDaysRecord(dayCount: String) {
-        tv_record.text = dayCount
-
+        if (dayCount.equals("NA")) {
+            tv_record.text = "-"
+        } else {
+            tv_record.text = dayCount
+        }
     }
 
     override fun showLatestAccidentDate(accident: String) {
-        tv_latestAccident.text = "depuis le  $accident"
+        if (accident.equals("NA")) {
+            tv_latestAccident.text = "pas encore d'accident"
+        } else {
+            tv_latestAccident.text = "depuis le  $accident"
+        }
     }
 
-    override fun showAccidentListDialog(accidents: List<String>) {
+    override fun showAccidentListDialog(accidents: List<Long>) {
         MaterialDialog.Builder(this)
                 .title("Les accidents")
-                .items(accidents)
-                .itemsCallbackSingleChoice(-1, MaterialDialog.ListCallbackSingleChoice { dialog, view, which, text ->
-                    /**
-                     * If you use alwaysCallSingleChoiceCallback(), which is discussed below,
-                     * returning false here won't allow the newly selected radio button to actually be selected.
-                     */
-                    /**
-                     * If you use alwaysCallSingleChoiceCallback(), which is discussed below,
-                     * returning false here won't allow the newly selected radio button to actually be selected.
-                     */
+                .items(accidents.map { SimpleDateFormat("dd MM yyyy").format(it)  })
+                .autoDismiss(false)
+                .alwaysCallSingleChoiceCallback()
+                .itemsCallbackSingleChoice(-1, { dialog, view, which, text ->
                     true
                 })
                 .negativeText("SUPPRIMER")
+                .onNegative { dialog, which ->
+//                    val f = DateTimeFormat.forPattern("dd MM yyyy")
+//                    val dateTime = f.parseDateTime()
+                     viewModel.removeAccident(accidents[dialog.selectedIndex])
+                    dialog.dismiss()
+                }
+                .neutralText("RESET")
+                .onNeutral { dialog, which ->
+                    viewModel.clearAccidents()
+                    dialog.dismiss()
+                }
                 .positiveText("FERMER")
+                .onPositive { dialog, which -> dialog.dismiss() }
                 .show()
     }
 
