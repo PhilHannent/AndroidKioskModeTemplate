@@ -1,12 +1,12 @@
-package fr.afaucogney.mobile.android.accidentcounter.feature
+package fr.afaucogney.mobile.android.accidentcounter.feature.counter
 
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
-import android.util.Log
 import com.uber.autodispose.kotlin.autoDisposable
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.base.BaseViewModel
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.rx.RxLogSubscriber
-import fr.afaucogney.mobile.android.accidentcounter.domain.*
+import fr.afaucogney.mobile.android.accidentcounter.common.archi.rx.logAllSubscriptionEvents
+import fr.afaucogney.mobile.android.accidentcounter.domain.counter.*
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.joda.time.DateTime
@@ -43,36 +43,29 @@ class AccidentCounterViewModel @Inject constructor(app: Application) : BaseViewM
     init {
         observeAccidentsUseCase
                 .execute()
-//                .filter { it.isEmpty() }
-//                .doOnNextLog()
-//                .map { it.map { SimpleDateFormat("dd MM yyyy").format(it) } }
-//                .flatMap { Observable.just(it.map { SimpleDateFormat("dd MM yyyy").format(it) }) }
-//                .flatMap { Observable.fromArray(it).map { SimpleDateFormat("dd MM yyyy").format(it) }.doOnNextLog().toList().toObservable() }
-//                .map { it.mapTo()forEach {  it = SimpleDateFormat("dd MM yyyy").format(it)} }
-//                .onErrorResumeNext { throwable: Throwable -> Observable.just(listOf<String>()) }
-//                .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { accidents.value = it }
                 .logAllSubscriptionEvents("accident")
                 .autoDisposable(this)
-                .subscribeWith(RxLogSubscriber("accidents"))
-//
+                .subscribe(RxLogSubscriber("accidents"))
+
         observeRecordDayUseCase
                 .execute()
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { record.value = it.toString() }
                 .logAllSubscriptionEvents("record")
                 .autoDisposable(this)
-                .subscribeWith(RxLogSubscriber("record"))
+                .subscribe(RxLogSubscriber("record"))
 
         observeLatestAccidentUseCase
                 .execute()
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { latestAccident.value = SimpleDateFormat("dd MM yyyy").format(it) }
-                .doOnNext { current.value = DateTime.now().minus(it).dayOfYear.toString() }
+                .doOnNext { current.value = (DateTime.now().minus(it).dayOfYear - 1).toString() }
                 .onErrorResumeNext { t: Throwable ->
                     if (t is NoSuchElementException) {
                         latestAccident.value = "NA"
                         current.value = "NA"
+                        t.printStackTrace()
                         Observable.empty()
                     } else {
                         Observable.error(t)
@@ -81,8 +74,6 @@ class AccidentCounterViewModel @Inject constructor(app: Application) : BaseViewM
                 .logAllSubscriptionEvents("latest")
                 .autoDisposable(this)
                 .subscribe(RxLogSubscriber("latest"))
-
-        record.value = "-4"
     }
 
 
@@ -108,12 +99,3 @@ class AccidentCounterViewModel @Inject constructor(app: Application) : BaseViewM
     }
 }
 
-private fun <T> Observable<T>.logAllSubscriptionEvents(context: String): Observable<T> {
-    return this
-            .doOnSubscribe { Log.w(context, "onSubscribe") }
-            .doOnComplete { Log.w(context, "onComplete") }
-            .doOnDispose { Log.w(context, "onDispose") }
-            .doOnError { Log.w(context, "onError") }
-            .doOnEach { Log.w(context, "onEach") }
-            .doOnTerminate { Log.w(context, "onTerminate") }
-}

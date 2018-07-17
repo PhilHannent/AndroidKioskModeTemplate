@@ -1,23 +1,22 @@
-package fr.afaucogney.mobile.android.accidentcounter.domain
+package fr.afaucogney.mobile.android.accidentcounter.domain.counter
 
 import com.vicpin.krealmextensions.queryAllAsFlowable
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.utils.LogUtil
 import fr.afaucogney.mobile.android.accidentcounter.data.AccidentEntity
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class ObserveAccidentsUseCase @Inject constructor() {
+class ObserveLatestAccidentUseCase @Inject constructor() {
 
-    fun execute(): Observable<List<Long>> {
+    fun execute(): Observable<Long> {
         return AccidentEntity()
                 .queryAllAsFlowable()
-                .map { it.sortedBy { it.date } }
+                .map { it.sortedByDescending { it.date } }
                 .toObservable()
+                .map { it.first() }
+                .map { it.date }
+                .doOnNext { LogUtil.d(this, "onNext$it") }
                 .subscribeOn(Schedulers.io())
-                .doOnNext { LogUtil.d(this, "onNext" + it.map { it.readableDate }) }
-                .map { it.map { it.date } }
-                .observeOn(AndroidSchedulers.mainThread())
     }
 }

@@ -1,8 +1,9 @@
-package fr.afaucogney.mobile.android.accidentcounter
+package fr.afaucogney.mobile.android.accidentcounter.common.app
 
 import android.app.Application
 import com.facebook.stetho.Stetho
-import fr.afaucogney.mobile.android.accidentcounter.common.app.KioskHseCounterApplicationModule
+import fr.afaucogney.mobile.android.accidentcounter.FactoryRegistry
+import fr.afaucogney.mobile.android.accidentcounter.MemberInjectorRegistry
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import net.danlew.android.joda.JodaTimeAndroid
@@ -12,7 +13,7 @@ import toothpick.registries.FactoryRegistryLocator
 import toothpick.registries.MemberInjectorRegistryLocator
 import toothpick.smoothie.module.SmoothieApplicationModule
 
-class KioskApp : Application() {
+class KioskHseCounterApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
@@ -30,8 +31,8 @@ class KioskApp : Application() {
         // (see https://github.com/stephanenicolas/toothpick/wiki/Factory-and-Member-Injector-registries)
         // If you're not using the reflection free configuration, the next 3 lines can be omitted
         Toothpick.setConfiguration(Configuration.forProduction().disableReflection())
-        MemberInjectorRegistryLocator.setRootRegistry(fr.afaucogney.mobile.android.accidentcounter.MemberInjectorRegistry())
-        FactoryRegistryLocator.setRootRegistry(fr.afaucogney.mobile.android.accidentcounter.FactoryRegistry())
+        MemberInjectorRegistryLocator.setRootRegistry(MemberInjectorRegistry())
+        FactoryRegistryLocator.setRootRegistry(FactoryRegistry())
 
         val appScope = Toothpick.openScope(this)
         appScope.installModules(

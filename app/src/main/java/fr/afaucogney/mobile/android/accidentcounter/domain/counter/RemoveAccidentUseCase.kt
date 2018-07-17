@@ -1,4 +1,4 @@
-package fr.afaucogney.mobile.android.accidentcounter.domain
+package fr.afaucogney.mobile.android.accidentcounter.domain.counter
 
 import com.vicpin.krealmextensions.delete
 import fr.afaucogney.mobile.android.accidentcounter.data.AccidentEntity

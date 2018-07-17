@@ -1,4 +1,4 @@
-package fr.afaucogney.mobile.android.accidentcounter.feature
+package fr.afaucogney.mobile.android.accidentcounter.feature.counter
 
 import android.arch.lifecycle.MutableLiveData
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.base.BaseActivityContract

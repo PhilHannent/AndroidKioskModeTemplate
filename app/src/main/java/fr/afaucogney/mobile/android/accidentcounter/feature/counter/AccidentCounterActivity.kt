@@ -1,4 +1,4 @@
-package fr.afaucogney.mobile.android.accidentcounter
+package fr.afaucogney.mobile.android.accidentcounter.feature.counter
 
 import android.app.DatePickerDialog
 import android.app.admin.DevicePolicyManager
@@ -8,17 +8,15 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.github.pwittchen.prefser.library.rx2.Prefser
+import fr.afaucogney.mobile.android.accidentcounter.R
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.base.BaseActivity
-import fr.afaucogney.mobile.android.accidentcounter.domain.AddNewAccidentUseCase
-import fr.afaucogney.mobile.android.accidentcounter.feature.AccidentCounterContract
-import fr.afaucogney.mobile.android.accidentcounter.feature.AccidentCounterViewModel
+import fr.afaucogney.mobile.android.accidentcounter.domain.counter.AddNewAccidentUseCase
+import fr.afaucogney.mobile.android.accidentcounter.feature.kiosk.MyAdmin
 import kotlinx.android.synthetic.main.activity_kiosk_hse.*
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -26,17 +24,16 @@ import toothpick.config.Module
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 
-
-
-
-//import java.sql.Date
-
-
-class HseCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilities {
+class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilities {
 
     override val layoutResourceId = R.layout.activity_kiosk_hse
 
     override fun initViewModelObservations() {
+
+        newAccidentDatelistener = DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+            viewModel.addNewAccident(DateTime(year, monthOfYear + 1, dayOfMonth, 12, 0, 0, 0))
+        }
+
         viewModel.observeDaysRecord().observe(this,
                 Observer {
                     showDaysRecord(it ?: "N?A")
@@ -118,10 +115,6 @@ class HseCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilit
 //        setVolumMax()
 
 
-        newAccidentDatelistener = DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-            viewModel.addNewAccident(DateTime(year, monthOfYear + 1, dayOfMonth, 12, 0, 0, 0))
-        }
-
     }
 
 
@@ -179,24 +172,10 @@ class HseCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilit
                 0)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_lock_activity, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-
-        return if (id == R.id.action_settings) {
-            true
-        } else super.onOptionsItemSelected(item)
-    }
-
 
     override fun showNewAccidentDateDialog() {
         DateTime.now().run {
-            val t = DatePickerDialog(this@HseCounterActivity, newAccidentDatelistener, this.year, this.monthOfYear - 1, this.dayOfMonth)
+            val t = DatePickerDialog(this@AccidentCounterActivity, newAccidentDatelistener, this.year, this.monthOfYear - 1, this.dayOfMonth)
             t.datePicker.maxDate = this.millis
             t.show()
         }
@@ -229,27 +208,23 @@ class HseCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilit
 
     override fun showAccidentListDialog(accidents: List<Long>) {
         MaterialDialog.Builder(this)
-                .title("Les accidents")
-                .items(accidents.map { SimpleDateFormat("dd MM yyyy").format(it)  })
+                .title("Les accidents depuis le " + SimpleDateFormat("dd MM yyyy").format(DateTime.now().millis))
+                .items(accidents.map { SimpleDateFormat("dd MM yyyy").format(it) })
                 .autoDismiss(false)
                 .alwaysCallSingleChoiceCallback()
-                .itemsCallbackSingleChoice(-1, { dialog, view, which, text ->
-                    true
-                })
+                .itemsCallbackSingleChoice(-1, { dialog, view, which, text -> true })
                 .negativeText("SUPPRIMER")
-                .onNegative { dialog, which ->
-//                    val f = DateTimeFormat.forPattern("dd MM yyyy")
-//                    val dateTime = f.parseDateTime()
-                     viewModel.removeAccident(accidents[dialog.selectedIndex])
+                .onNegative { dialog, _ ->
+                    viewModel.removeAccident(accidents[dialog.selectedIndex])
                     dialog.dismiss()
                 }
                 .neutralText("RESET")
-                .onNeutral { dialog, which ->
+                .onNeutral { dialog, _ ->
                     viewModel.clearAccidents()
                     dialog.dismiss()
                 }
                 .positiveText("FERMER")
-                .onPositive { dialog, which -> dialog.dismiss() }
+                .onPositive { dialog, _ -> dialog.dismiss() }
                 .show()
     }
 
