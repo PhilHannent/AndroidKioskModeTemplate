@@ -1,10 +1,21 @@
 package fr.afaucogney.mobile.android.accidentcounter.feature.counter
 
+import android.app.ActivityManager
 import android.app.DatePickerDialog
 import android.app.admin.DeviceAdminReceiver
+import android.app.admin.DevicePolicyManager
+import android.app.admin.SystemUpdatePolicy
 import android.arch.lifecycle.Observer
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.media.AudioManager
+import android.os.BatteryManager
+import android.os.Bundle
+import android.os.UserManager
+import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -22,6 +33,7 @@ import toothpick.config.Module
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+
 
 class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilities {
 
@@ -90,8 +102,29 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
 
     private lateinit var newAccidentDatelistener: DatePickerDialog.OnDateSetListener
 
-    //    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
+    @Inject
+    lateinit var mDevicePolicyManager: DevicePolicyManager
+
+    @Inject
+    lateinit var mPackageManager: PackageManager
+
+    var mAdminComponentName: ComponentName? = null
+
+//    cyManager? = null
+//    var mPackageManager: PackageManager? = null
+
+
+//    mPackageManager = packageManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        mAdminComponentName = ComponentName(applicationContext, MyAdmin::class.java)
+
+//        mDevicePolicyManager = (DevicePolicyManager) getSystemService (Context.DEVICE_POLICY_SERVICE)
+//        mPackageManager = packageManager
+        setDefaultCosuPolicies(true)
+
 //        /* Set the app into full screen mode */
 ////        window.decorView.systemUiVisibility = flags
 //
@@ -114,7 +147,8 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
 ////        setVolumMax()
 //
 //
-//    }
+    }
+
     @OnClick(R.id.iv_clearPatternButton)
     fun onClearSymbolClick() {
         if (!isLocked) {
@@ -283,6 +317,99 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
     }
 
     inner class MyAdmin : DeviceAdminReceiver() {
+    }
+
+    fun fds() {
+        // start lock task mode if it's not already active
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        // ActivityManager.getLockTaskModeState api is not available in pre-M.
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+//            if (!am.isInLockTaskMode) {
+//                startLockTask()
+//            }
+//        } else {
+        if (am.lockTaskModeState == ActivityManager.LOCK_TASK_MODE_NONE) {
+            startLockTask()
+        }
+//        }
+    }
+
+    //    var mAdminComponentName: ComponentName? = null
+////    var mDevicePolicyManager: DevicePolicyManager? = null
+//    var mPackageManager: PackageManager? = null
+    val Battery_PLUGGED_ANY = Integer.toString(BatteryManager.BATTERY_PLUGGED_AC
+            or BatteryManager.BATTERY_PLUGGED_USB
+            or BatteryManager.BATTERY_PLUGGED_WIRELESS)
+
+    val DONT_STAY_ON = "0"
+
+
+    private fun setDefaultCosuPolicies(active: Boolean) {
+        // set user restrictions
+        setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, active)
+        setUserRestriction(UserManager.DISALLOW_FACTORY_RESET, active)
+        setUserRestriction(UserManager.DISALLOW_ADD_USER, active)
+        setUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, active)
+        setUserRestriction(UserManager.DISALLOW_ADJUST_VOLUME, active)
+
+        // disable keyguard and status bar
+        mDevicePolicyManager.setKeyguardDisabled(mAdminComponentName, active)
+        mDevicePolicyManager.setStatusBarDisabled(mAdminComponentName, active)
+
+        // enable STAY_ON_WHILE_PLUGGED_IN
+        enableStayOnWhilePluggedIn(active)
+
+        // set System Update policy
+
+        if (active) {
+            mDevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName,
+                    SystemUpdatePolicy.createWindowedInstallPolicy(60, 120))
+        } else {
+            mDevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName, null)
+        }
+
+        // set this Activity as a lock task package
+
+        mDevicePolicyManager.setLockTaskPackages(mAdminComponentName,
+                if (active) arrayOf(packageName) else arrayOf<String>())
+
+        val intentFilter = IntentFilter(Intent.ACTION_MAIN)
+        intentFilter.addCategory(Intent.CATEGORY_HOME)
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT)
+
+        if (active) {
+            // set Cosu activity as home intent receiver so that it is started
+            // on reboot
+            mDevicePolicyManager.addPersistentPreferredActivity(
+                    mAdminComponentName, intentFilter, ComponentName(
+                    packageName, AccidentCounterActivity::class.java.name))
+        } else {
+            mDevicePolicyManager.clearPackagePersistentPreferredActivities(
+                    mAdminComponentName, packageName)
+        }
+    }
+
+    private fun setUserRestriction(restriction: String, disallow: Boolean) {
+        if (disallow) {
+            mDevicePolicyManager.addUserRestriction(mAdminComponentName,
+                    restriction)
+        } else {
+            mDevicePolicyManager.clearUserRestriction(mAdminComponentName,
+                    restriction)
+        }
+    }
+
+    private fun enableStayOnWhilePluggedIn(enabled: Boolean) {
+        if (enabled) {
+            mDevicePolicyManager.setGlobalSetting(
+                    mAdminComponentName,
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
+                    Battery_PLUGGED_ANY)
+        } else {
+            mDevicePolicyManager.setGlobalSetting(
+                    mAdminComponentName,
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN, DONT_STAY_ON)
+        }
     }
 
 }
