@@ -35,6 +35,8 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:text="407"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tv_current_unite"
@@ -91,6 +93,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:text="100"
         app:layout_constraintBottom_toTopOf="@+id/tv_record"
         app:layout_constraintEnd_toStartOf="@+id/tv_record_unite"
@@ -109,6 +113,16 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
+        android:id="@+id/iv_clearPatternButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/iv_lockButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/clear_symbol_drawable" />
+
+    <ImageView
         android:id="@+id/iv_lockButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -116,18 +130,16 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@mipmap/ic_unlock" />
+        app:srcCompat="@drawable/lock_drawable" />
 
     <TextClock
         android:id="@+id/tv_currentDate"
         style="@style/CounterTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:background="@color/colorPrimaryDark"
-        android:format24Hour="dd MMM yyyy"
+        android:format24Hour="dd MMM yyyy - k:mm"
+        android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -142,13 +154,4 @@
         app:layout_constraintEnd_toEndOf="@+id/back_right"
         app:layout_constraintTop_toBottomOf="@+id/tv_current" />
 
-    <ImageView
-        android:id="@+id/iv_clear_prefs"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 </android.support.constraint.ConstraintLayout>

@@ -34,7 +34,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="$PROJECT_DIR$/unlockYourProjectSimply_00.png" />
+                                      <entry key="imageAsset" value="$USER_HOME$/Downloads/lock.png" />
+                                      <entry key="outputName" value="ic_lock" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -74,7 +75,7 @@
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
                                       <entry key="iconShape" value="CIRCLE" />
-                                      <entry key="imageAsset" value="$PROJECT_DIR$/unlockYourProjectSimply_00.png" />
+                                      <entry key="imageAsset" value="$USER_HOME$/Downloads/lock-open.png" />
                                       <entry key="outputName" value="ic_unlock" />
                                     </map>
                                   </option>
@@ -85,7 +86,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputIconType" value="LAUNCHER_LEGACY" />
+                            <entry key="outputIconType" value="ACTIONBAR" />
                           </map>
                         </option>
                       </PersistentState>

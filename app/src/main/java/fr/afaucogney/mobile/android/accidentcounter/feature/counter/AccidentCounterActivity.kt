@@ -1,27 +1,26 @@
 package fr.afaucogney.mobile.android.accidentcounter.feature.counter
 
 import android.app.DatePickerDialog
-import android.app.admin.DevicePolicyManager
+import android.app.admin.DeviceAdminReceiver
 import android.arch.lifecycle.Observer
-import android.content.ComponentName
 import android.content.Context
 import android.media.AudioManager
-import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.github.pwittchen.prefser.library.rx2.Prefser
 import fr.afaucogney.mobile.android.accidentcounter.R
 import fr.afaucogney.mobile.android.accidentcounter.common.archi.base.BaseActivity
-import fr.afaucogney.mobile.android.accidentcounter.domain.counter.AddNewAccidentUseCase
-import fr.afaucogney.mobile.android.accidentcounter.feature.kiosk.MyAdmin
+import fr.afaucogney.mobile.android.accidentcounter.common.archi.base.BaseDialogFragment
+import fr.afaucogney.mobile.android.accidentcounter.data.LockPatternDialogEvent
+import fr.afaucogney.mobile.android.accidentcounter.feature.lock.CheckLockViewPatternFragment
+import fr.afaucogney.mobile.android.accidentcounter.feature.lock.NewPatternLockViewFragment
 import kotlinx.android.synthetic.main.activity_kiosk_hse.*
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import toothpick.config.Module
 import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapabilities {
@@ -30,7 +29,7 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
 
     override fun initViewModelObservations() {
 
-        newAccidentDatelistener = DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+        newAccidentDatelistener = DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
             viewModel.addNewAccident(DateTime(year, monthOfYear + 1, dayOfMonth, 12, 0, 0, 0))
         }
 
@@ -48,6 +47,15 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
                 Observer {
                     showCurrentDayCountWithoutAccident(it ?: "N?A")
                 })
+
+        viewModel.observeLockPatternDialog().observe(this, Observer {
+            when (it) {
+                LockPatternDialogEvent.SHOWRECORD -> goToLockPatternRecordDialog()
+                LockPatternDialogEvent.SHOWCHECK -> goToUnlockPatternDialog()
+                LockPatternDialogEvent.LOCK -> goToKioskMode()
+                LockPatternDialogEvent.UNLOCK -> goToNotKioskMode()
+            }
+        })
     }
     /*
         1. Set Device owner and lock task/pin screen
@@ -68,55 +76,51 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
     lateinit var viewModel: AccidentCounterViewModel
 
 
-    private val flags = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_FULLSCREEN
-//            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            )
+//    private val flags = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+////            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+////            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//            or View.SYSTEM_UI_FLAG_FULLSCREEN
+////            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//            )
 
 
     var isLocked = false
-    var counter = 0
-    var record = 0
-    var latestAccident: LocalDate = LocalDate.now()
-
-    @Inject
-    lateinit var addNewAccidentUseCase: AddNewAccidentUseCase
+//    var counter = 0
 
     private lateinit var newAccidentDatelistener: DatePickerDialog.OnDateSetListener
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-//        val scope = Toothpick.openScopes(application, this)
-//        scope.installModules(SmoothieActivityModule(this))
-        super.onCreate(savedInstanceState)
-//        Toothpick.inject(this, scope)
-
-        /* Set the app into full screen mode */
-//        window.decorView.systemUiVisibility = flags
-
-        /* Following code allow the app packages to lock task in true kiosk mode */
-        // get policy manager
-        val myDevicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        // get this app package name
-        val mDPM = ComponentName(this, MyAdmin::class.java)
-        //startLockTask();
-        if (myDevicePolicyManager.isDeviceOwnerApp(this.packageName)) {
-            // get this app package name
-            val packages = arrayOf(this.packageName)
-            // mDPM is the admin package, and allow the specified packages to lock task
-            //myDevicePolicyManager.setLockTaskPackages(mDPM, packages);
-            startLockTask()
-        } else {
-            Toast.makeText(applicationContext, "Not owner", Toast.LENGTH_LONG).show()
+    //    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        /* Set the app into full screen mode */
+////        window.decorView.systemUiVisibility = flags
+//
+//        /* Following code allow the app packages to lock task in true kiosk mode */
+////        // get policy manager
+////        val myDevicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+////        // get this app package name
+////        val mDPM = ComponentName(this, MyAdmin::class.java)
+////        //startLockTask();
+////        if (myDevicePolicyManager.isDeviceOwnerApp(this.packageName)) {
+////            // get this app package name
+////            val packages = arrayOf(this.packageName)
+////            // mDPM is the admin package, and allow the specified packages to lock task
+////            //myDevicePolicyManager.setLockTaskPackages(mDPM, packages);
+////            startLockTask()
+////        } else {
+////            Toast.makeText(applicationContext, "Not owner", Toast.LENGTH_LONG).show()
+////        }
+//
+////        setVolumMax()
+//
+//
+//    }
+    @OnClick(R.id.iv_clearPatternButton)
+    fun onClearSymbolClick() {
+        if (!isLocked) {
+            showClearPatternDialog()
         }
-
-//        setVolumMax()
-
-
     }
-
 
     @OnClick(R.id.tv_current)
     fun onNewAccidentDate() {
@@ -132,19 +136,12 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
         }
     }
 
-    @OnClick(R.id.iv_clear_prefs)
-    fun onCLearClick() {
-        if (!isLocked) {
-            Prefser(applicationContext).clear()
-        }
-    }
-
     @OnClick(R.id.iv_lockButton)
     fun onLockButtonClick() {
         if (!isLocked) {
-            switchToKioskMode()
+            viewModel.tryToGoToKioskMode()
         } else {
-            releaseKioskMode()
+            goToUnlockPatternDialog()
         }
     }
 
@@ -208,11 +205,11 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
 
     override fun showAccidentListDialog(accidents: List<Long>) {
         MaterialDialog.Builder(this)
-                .title("Les accidents depuis le " + SimpleDateFormat("dd MM yyyy").format(DateTime.now().millis))
-                .items(accidents.map { SimpleDateFormat("dd MM yyyy").format(it) })
+                .title("Accidents depuis le " + SimpleDateFormat("dd MM yyyy", Locale.FRANCE).format(DateTime.now().millis))
+                .items(accidents.map { SimpleDateFormat("dd MM yyyy", Locale.FRANCE).format(it) })
                 .autoDismiss(false)
                 .alwaysCallSingleChoiceCallback()
-                .itemsCallbackSingleChoice(-1, { dialog, view, which, text -> true })
+                .itemsCallbackSingleChoice(-1, { _, _, _, _ -> true })
                 .negativeText("SUPPRIMER")
                 .onNegative { dialog, _ ->
                     viewModel.removeAccident(accidents[dialog.selectedIndex])
@@ -228,26 +225,64 @@ class AccidentCounterActivity : BaseActivity(), AccidentCounterContract.ViewCapa
                 .show()
     }
 
-    override fun switchToKioskMode() {
-        startLockTask()
-        isLocked = true
+    private fun showClearPatternDialog() {
+        MaterialDialog.Builder(this)
+                .title("Etes vous certain de vouloir éffacer votre symbol de securité")
+                .autoDismiss(false)
+                .negativeText("ANNULER")
+                .onNegative { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .positiveText("CONFIRMER")
+                .onPositive { dialog, _ ->
+                    viewModel.clearLockPattern()
+                    dialog.dismiss()
+                }
+                .show()
     }
 
-    override fun releaseKioskMode() {
-        stopLockTask()
-        isLocked = false
+
+    override fun goToKioskMode() {
+        if (!isLocked) {
+            startLockTask()
+            iv_clearPatternButton.visibility = View.GONE
+            isLocked = true
+            iv_lockButton.setImageResource(R.drawable.unlock_drawable)
+        }
     }
 
-    override fun goToLockPatternRecord() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun goToNotKioskMode() {
+        if (isLocked) {
+            stopLockTask()
+            iv_clearPatternButton.visibility = View.VISIBLE
+            isLocked = false
+            iv_lockButton.setImageResource(R.drawable.lock_drawable)
+        }
     }
 
-    override fun goToUnlockPattern() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun goToLockPatternRecordDialog() {
+        clearDialog()
+        NewPatternLockViewFragment.newInstance().show(supportFragmentManager)
+    }
+
+    override fun goToUnlockPatternDialog() {
+        clearDialog()
+        CheckLockViewPatternFragment.newInstance().show(supportFragmentManager)
+    }
+
+    private fun clearDialog() {
+        val dialog = supportFragmentManager.findFragmentByTag(BaseDialogFragment.DIALOG)
+        if (dialog != null && dialog is BaseDialogFragment) {
+            dialog.dismiss()
+        }
     }
 
     override fun closeApp() {
+        clearDialog()
         finish()
+    }
+
+    inner class MyAdmin : DeviceAdminReceiver() {
     }
 
 }

@@ -12,11 +12,11 @@ class ObserveLatestAccidentUseCase @Inject constructor() {
     fun execute(): Observable<Long> {
         return AccidentEntity()
                 .queryAllAsFlowable()
-                .map { it.sortedByDescending { it.date } }
                 .toObservable()
+                .map { it.sortedByDescending { it.date } }
                 .map { it.first() }
                 .map { it.date }
-                .doOnNext { LogUtil.d(this, "onNext$it") }
+                .doOnNext { LogUtil.d(this, "onNext $it") }
                 .subscribeOn(Schedulers.io())
     }
 }

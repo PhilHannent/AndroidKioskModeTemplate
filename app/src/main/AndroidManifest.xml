@@ -2,25 +2,32 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="fr.afaucogney.mobile.android.accidentcounter">
 
+    <!--PERMISSIONS-->
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
+
+    <!--APPLICATION-->
     <application
-        android:allowBackup="true"
         android:name=".common.app.KioskHseCounterApplication"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+        <!--ACTIVITIES-->
         <activity
             android:name=".feature.counter.AccidentCounterActivity"
             android:keepScreenOn="true"
             android:label="@string/app_name"
+            android:lockTaskMode="always"
             android:launchMode="singleTask"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
+        <!--RECEIVERS-->
         <receiver
             android:name=".feature.kiosk.MyAdmin"
             android:description="@string/sample_device_admin_description"
@@ -34,5 +41,4 @@
             </intent-filter>
         </receiver>
     </application>
-    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
 </manifest>
