@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -89,21 +91,18 @@ public class KioskActivity extends Activity {
 //        final TextView t1 = findViewById(R.id.textView);
 //        Button b2 = (Button) findViewById(R.id.button2);
         Button b3 = (Button) findViewById(R.id.button3);
-
-//        b1.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                new MaterialDialog.Builder(KioskActivity.this)
-//                        .title("Compteur")
-//                        //         .inputRangeRes(2, 20, R.color.material_red_500
-//                        .input(null, null, new MaterialDialog.InputCallback() {
-//                            @Override
-//                            public void onInput(MaterialDialog dialog, CharSequence input) {
-//                                t1.setText("Nombre de jours sans accident = " + input);
-//                            }
-//                        }).show();
-//            }
-//        });
+        b3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                }
+                catch (Exception e)
+                {
+                    Toast.makeText(getApplicationContext(), "Failed to call Wifi Intent: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
     }
 
