@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,6 +67,9 @@ public class KioskActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 startLockTask();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                editor.putBoolean("PIN_ACTIVE", true);
+                editor.apply();
                 return false;
             }
         });
@@ -73,29 +78,32 @@ public class KioskActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 stopLockTask();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                editor.putBoolean("PIN_ACTIVE", false);
+                editor.apply();
                 return false;
             }
         });
 
-        Button b1 = (Button) findViewById(R.id.button);
-        final TextView t1 = findViewById(R.id.textView);
-        Button b2 = (Button) findViewById(R.id.button2);
+//        Button b1 = (Button) findViewById(R.id.button);
+//        final TextView t1 = findViewById(R.id.textView);
+//        Button b2 = (Button) findViewById(R.id.button2);
         Button b3 = (Button) findViewById(R.id.button3);
 
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new MaterialDialog.Builder(KioskActivity.this)
-                        .title("Compteur")
-                        //         .inputRangeRes(2, 20, R.color.material_red_500
-                        .input(null, null, new MaterialDialog.InputCallback() {
-                            @Override
-                            public void onInput(MaterialDialog dialog, CharSequence input) {
-                                t1.setText("Nombre de jours sans accident = " + input);
-                            }
-                        }).show();
-            }
-        });
+//        b1.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                new MaterialDialog.Builder(KioskActivity.this)
+//                        .title("Compteur")
+//                        //         .inputRangeRes(2, 20, R.color.material_red_500
+//                        .input(null, null, new MaterialDialog.InputCallback() {
+//                            @Override
+//                            public void onInput(MaterialDialog dialog, CharSequence input) {
+//                                t1.setText("Nombre de jours sans accident = " + input);
+//                            }
+//                        }).show();
+//            }
+//        });
 
     }
 
@@ -110,6 +118,16 @@ public class KioskActivity extends Activity {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             Toast.makeText(this, "Volume button is disabled", Toast.LENGTH_SHORT).show();
             return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_BACK ||
+                keyCode == KeyEvent.KEYCODE_HOME ||
+                keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if (sharedPreferences.getBoolean("PIN_ACTIVE", false)) {
+                Toast.makeText(this, "Button is disabled", Toast.LENGTH_SHORT).show();
+                return true;
+            }
         }
 
         return super.onKeyDown(keyCode, event);
@@ -139,4 +157,5 @@ public class KioskActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
